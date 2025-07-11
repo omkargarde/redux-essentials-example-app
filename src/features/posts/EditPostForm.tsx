@@ -15,18 +15,20 @@ interface IEditPostFormElements extends HTMLFormElement {
 export function EditPostForm() {
   const { postId } = useParams()
 
-  const post = useAppSelector((state) => selectPostById(state, postId!))
+  // before: const post = useAppSelector((state) => selectPostById(state, postId!))
+  const post = useAppSelector((state) =>
+    postId ? selectPostById(state, postId) : undefined,
+  )
 
-  const dispatch = useAppDispatch()
-  const navigate = useNavigate()
-
-  if (!post) {
+  if (!post || !postId) {
     return (
       <section>
-        <h2>Post not found</h2>
+        <h2>Post not found!</h2>
       </section>
     )
   }
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
 
   function savePostHandler(e: React.FormEvent<IEditPostFormElements>) {
     e.preventDefault()
@@ -37,8 +39,13 @@ export function EditPostForm() {
     const content = elements.postContent.value
 
     if (title && content && post?.id) {
-      dispatch(postUpdated({ id: post.id, title, content }))
-      navigate(`/posts/${post.id}`)
+      try {
+        dispatch(postUpdated({ id: post.id, title, content }))
+        navigate(`/posts/${post.id}`)
+      } catch (error) {
+        console.error('Failed to update post:', error)
+        // TODO: display notification to the user about the failure
+      }
     }
   }
 

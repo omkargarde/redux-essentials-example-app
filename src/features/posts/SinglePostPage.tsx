@@ -5,8 +5,15 @@ import { selectPostById } from './postsSlice'
 export function SinglePostPage() {
   const { postId } = useParams()
 
-  const post = useAppSelector((state) => selectPostById(state, postId!))
+  if (!postId) {
+    return (
+      <section>
+        <h2>Invalid post ID</h2>
+      </section>
+    )
+  }
 
+  const post = useAppSelector((state) => selectPostById(state, postId))
   if (post === undefined) {
     return (
       <section>
